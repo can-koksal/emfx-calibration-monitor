@@ -2,7 +2,7 @@
 
 A client-side tool that calibrates USD/TRY and EUR/TRY 12-month forecast paths by blending survey-based expectations, historical bias correction, realized-trend extrapolation, and a discrete-shock overlay with automated regression checks to guard against calculation drift.
 
-**[(https://can-koksal.github.io/emfx-calibration-monitor/)](#)** 
+**[https://can-koksal.github.io/emfx-calibration-monitor/](#)** 
 Independent research prototype. Not affiliated with any bank or financial institution. Not a trading recommendation.
 
 ---
