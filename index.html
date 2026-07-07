@@ -1,0 +1,1828 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Build: 2026-07-06-real-verified-seed-data-v5 -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TRY FX Forecast Calibration Monitor</title>
+  <style>
+    :root {
+      --bg: #090d12;
+      --panel: #111820;
+      --panel-2: #151f29;
+      --panel-3: #0d131a;
+      --line: #263442;
+      --line-soft: #1d2834;
+      --text: #e7eef5;
+      --muted: #8fa0af;
+      --soft: #b7c3ce;
+      --amber: #f3b84d;
+      --amber-bg: rgba(243, 184, 77, .12);
+      --green: #3ed48f;
+      --green-bg: rgba(62, 212, 143, .12);
+      --red: #ff6370;
+      --red-bg: rgba(255, 99, 112, .13);
+      --blue: #58b7ff;
+      --blue-bg: rgba(88, 183, 255, .12);
+      --violet: #a58bff;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .32);
+      --radius: 8px;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        linear-gradient(180deg, rgba(17, 24, 32, .74), rgba(9, 13, 18, 1) 340px),
+        repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 42px),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      letter-spacing: 0;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: #17212b;
+      min-height: 36px;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+
+    button:hover { border-color: #3b5369; background: #1c2a37; }
+    button:active { transform: translateY(1px); }
+    button.primary { background: #1f5d7a; border-color: #2b82aa; }
+    button.danger { background: #321820; border-color: #6a2b35; color: #ffdce0; }
+    button.ghost { background: transparent; }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 34px;
+      color: var(--text);
+      background: #080d12;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(88, 183, 255, .12);
+    }
+
+    input.invalid {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(255, 99, 112, .1);
+    }
+
+    textarea {
+      min-height: 190px;
+      resize: vertical;
+      font-family: var(--mono);
+      line-height: 1.55;
+    }
+
+    .app {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.04;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--soft);
+      font-size: 15px;
+    }
+
+    .terminal-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--green);
+      border: 1px solid rgba(62, 212, 143, .35);
+      background: rgba(62, 212, 143, .08);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .build-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: rgba(8, 13, 18, .56);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--green);
+    }
+
+    .banner-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .purpose, .compliance {
+      border: 1px solid var(--line);
+      background: rgba(17, 24, 32, .86);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .purpose p, .compliance p, .helper, .note {
+      color: var(--soft);
+      line-height: 1.45;
+      font-size: 13px;
+    }
+
+    .compliance {
+      border-color: rgba(243, 184, 77, .45);
+      background: var(--amber-bg);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      background: var(--panel-3);
+      border-radius: var(--radius);
+      padding: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tabbar, .segmented, .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tab, .segment {
+      min-height: 34px;
+      padding: 7px 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .tab.active, .segment.active {
+      background: #20303e;
+      border-color: var(--blue);
+      color: var(--text);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+    body.simple .advanced-only { display: none !important; }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(21, 31, 41, .92), rgba(13, 19, 26, .92));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 19px;
+      line-height: 1.2;
+      font-weight: 720;
+    }
+
+    h3 {
+      font-size: 14px;
+      line-height: 1.25;
+      color: var(--text);
+      font-weight: 720;
+      text-transform: uppercase;
+      font-family: var(--mono);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field { min-width: 0; }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+      text-transform: uppercase;
+      font-family: var(--mono);
+    }
+
+    .metric {
+      display: grid;
+      gap: 6px;
+      border-top: 1px solid var(--line-soft);
+      padding-top: 10px;
+    }
+
+    .metric:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-family: var(--mono);
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-family: var(--mono);
+      font-size: clamp(22px, 2.6vw, 32px);
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .metric-small {
+      color: var(--soft);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .hero-card {
+      display: grid;
+      gap: 13px;
+      min-height: 260px;
+    }
+
+    .hero-card.usd { border-color: rgba(88, 183, 255, .42); }
+    .hero-card.eur { border-color: rgba(62, 212, 143, .38); }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      color: var(--soft);
+      background: #101820;
+      font-size: 11px;
+      font-family: var(--mono);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .badge.green { color: var(--green); background: var(--green-bg); border-color: rgba(62, 212, 143, .35); }
+    .badge.yellow { color: var(--amber); background: var(--amber-bg); border-color: rgba(243, 184, 77, .38); }
+    .badge.red { color: var(--red); background: var(--red-bg); border-color: rgba(255, 99, 112, .35); }
+    .badge.blue { color: var(--blue); background: var(--blue-bg); border-color: rgba(88, 183, 255, .35); }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line-soft);
+      background: rgba(8, 13, 18, .55);
+      border-radius: 6px;
+      padding: 10px;
+      min-width: 0;
+    }
+
+    .kpi .metric-value {
+      margin-top: 6px;
+      font-size: 18px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #070b10;
+    }
+
+    table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line-soft);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: var(--muted);
+      background: #0c1218;
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    td { color: var(--soft); }
+    td strong { color: var(--text); }
+    tr:hover td { background: rgba(88, 183, 255, .035); }
+
+    .editable-table input, .editable-table select {
+      min-width: 110px;
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+
+    .editable-table .notes-input { min-width: 180px; }
+    .delete-btn { min-height: 30px; padding: 5px 9px; }
+
+    .warning-stack {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .warning {
+      border: 1px solid rgba(243, 184, 77, .35);
+      background: var(--amber-bg);
+      color: #ffd996;
+      border-radius: 6px;
+      padding: 9px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .debug-note {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(8, 13, 18, .62);
+      color: var(--soft);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .debug-note.warn {
+      border-color: rgba(255, 99, 112, .5);
+      background: var(--red-bg);
+      color: #ffdce0;
+    }
+
+    .controls-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .formula-list {
+      display: grid;
+      gap: 10px;
+      color: var(--soft);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .formula-list code {
+      display: block;
+      margin-top: 4px;
+      color: var(--green);
+      background: #070b10;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      padding: 8px;
+      white-space: normal;
+    }
+
+    .hidden-file { display: none; }
+
+    @media (max-width: 1100px) {
+      .grid.three, .grid.four, .controls-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .banner-grid, .topbar { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .app { padding: 14px; }
+      .grid.two, .grid.three, .grid.four, .field-grid, .kpi-row, .controls-row { grid-template-columns: 1fr; }
+      .toolbar { align-items: stretch; }
+      .tabbar, .segmented, .actions { width: 100%; }
+      .tab, .segment, .actions button { flex: 1 1 auto; }
+      table { min-width: 760px; }
+      .terminal-chip { white-space: normal; }
+      .build-marker { white-space: normal; }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #111820;
+      }
+
+      .app {
+        max-width: none;
+        padding: 10mm;
+      }
+
+      .toolbar, .actions, button, input[type="file"], .debug-note, .terminal-chip, .build-marker {
+        display: none !important;
+      }
+
+      .section, .advanced-only {
+        display: block !important;
+      }
+
+      .card, .purpose, .compliance, .table-wrap {
+        box-shadow: none;
+        border-color: #c7d0da;
+        background: #ffffff;
+        color: #111820;
+        break-inside: avoid;
+      }
+
+      th {
+        color: #263442;
+        background: #eef3f7;
+      }
+
+      td, .helper, .note, .metric-small, .metric-label {
+        color: #263442;
+      }
+
+      table {
+        min-width: 0;
+        font-size: 9px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>TRY FX Forecast Calibration Monitor</h1>
+        <p class="subtitle">A realization-based framework for calibrating USD/TRY and EUR/TRY forecast paths.</p>
+      </div>
+      <div class="grid" style="justify-items:end;">
+        <div class="terminal-chip"><span class="dot"></span><span>MANUAL DATA / LOCAL MODEL</span></div>
+        <div class="build-marker" id="buildMarker"></div>
+      </div>
+    </header>
+
+    <div class="banner-grid">
+      <div class="purpose">
+        <p>Calibrates USD/TRY and EUR/TRY forecast paths using current expectations, historical forecast errors, and realized depreciation trends. This framework does not forecast with certainty and does not provide a trading recommendation.</p>
+      </div>
+      <div class="compliance">
+        <p>Independent research prototype. Not affiliated with any bank or financial institution. Not a trading recommendation.</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tabbar" id="tabs"></div>
+      <div class="segmented" aria-label="View mode">
+        <button class="segment active" id="simpleBtn" type="button">Simple View</button>
+        <button class="segment" id="advancedBtn" type="button">Advanced View</button>
+      </div>
+      <div class="actions">
+        <button type="button" id="resetDemoBtn">Reset Demo Data</button>
+        <button class="danger" type="button" id="clearStorageBtn">Clear Saved Data</button>
+      </div>
+      <div class="debug-note" id="debugNote"></div>
+    </div>
+
+    <main>
+      <section class="section active" data-section="inputs">
+        <div class="grid two">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Current Market Inputs</h2>
+                <p class="helper">Forecast horizons: 1M, 2M, 3M, 5M, 6M, 12M.</p>
+              </div>
+              <span class="badge blue">T0 setup</span>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="valuationDate">Forecast / valuation date</label>
+                <input id="valuationDate" type="date">
+              </div>
+              <div class="field">
+                <label for="eurusdSpot">EUR/USD spot today</label>
+                <input id="eurusdSpot" data-number type="text" inputmode="decimal">
+              </div>
+              <div class="field">
+                <label for="eurusd12">Expected EUR/USD 12M</label>
+                <input id="eurusd12" data-number type="text" inputmode="decimal">
+              </div>
+              <div class="field">
+                <label for="crossRateEnabled">EUR/TRY cross-rate scenario logic</label>
+                <select id="crossRateEnabled">
+                  <option value="off">Off</option>
+                  <option value="on">On</option>
+                </select>
+              </div>
+            </div>
+            <p class="note" style="margin-top:12px;">EUR/TRY may be entered directly, or cross-checked as USD/TRY x EUR/USD.</p>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>12M Forecast Snapshot</h2>
+                <p class="helper">Updated whenever inputs, history, trends, or weights change.</p>
+              </div>
+              <span class="badge green">live calc</span>
+            </div>
+            <div class="grid two" id="miniSnapshot"></div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:12px;">
+          <div class="card">
+            <div class="card-header">
+              <h3>USD/TRY</h3>
+              <span class="badge blue">direct input</span>
+            </div>
+            <div class="field-grid" id="usdInputs"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>EUR/TRY</h3>
+              <span class="badge green">direct input</span>
+            </div>
+            <div class="field-grid" id="eurInputs"></div>
+          </div>
+        </div>
+
+        <div class="grid two advanced-only" style="margin-top:12px;">
+          <div class="card">
+            <div class="card-header"><h3>USD/TRY Recent Realized Trend Inputs</h3></div>
+            <div class="field-grid" id="usdTrendInputs"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>EUR/TRY Recent Realized Trend Inputs</h3></div>
+            <div class="field-grid" id="eurTrendInputs"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section advanced-only" data-section="history">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Historical Forecast Error Database</h2>
+              <p class="helper">Historical expectation data is user-supplied because public historical expectation data is fragmented. Actual realized values may also be manually entered in this v1.</p>
+            </div>
+            <span class="badge blue" id="historyCount">0 rows</span>
+          </div>
+          <div class="actions" style="margin-bottom:12px;">
+            <button class="primary" type="button" id="addCaseBtn">Add historical case</button>
+            <button type="button" id="loadDemoCasesBtn">Load demo cases</button>
+            <button class="danger" type="button" id="clearCasesBtn">Clear all historical cases</button>
+            <button type="button" id="exportCsvBtn">Export historical cases as CSV</button>
+            <button type="button" id="importCsvBtn">Import historical cases from CSV</button>
+            <input class="hidden-file" id="csvFile" type="file" accept=".csv,text/csv">
+          </div>
+          <div class="table-wrap">
+            <table class="editable-table">
+              <thead>
+                <tr>
+                  <th>Pair</th><th>T0 date</th><th>Source label</th><th>Horizon</th><th>Spot T0</th><th>Expected</th><th>Actual</th><th>Notes</th><th>Shock?</th><th>Delete</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+          <div class="warning-stack" id="dataQualityWarnings"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <div class="card-header"><h2>Forecast Error Calculations</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pair</th><th>T0 Date</th><th>Horizon</th><th>Source</th><th>Spot T0</th><th>Expected</th><th>Actual</th><th>Expected Dep.</th><th>Realized Dep.</th><th>Forecast Error</th><th>Verdict</th>
+                </tr>
+              </thead>
+              <tbody id="errorBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:12px;" id="biasCards"></div>
+        <div class="card" style="margin-top:12px;">
+          <div class="card-header"><h2>Historical Bias Summary</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Pair</th><th>Horizon</th><th>Observations</th><th>Average Error</th><th>Median Error</th><th>Bias Direction</th></tr></thead>
+              <tbody id="biasTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" data-section="engine">
+        <div class="grid two" id="heroCards"></div>
+
+        <div class="card advanced-only" style="margin-top:12px;">
+          <div class="card-header">
+            <div>
+              <h2>Forecast Calibration Engine</h2>
+              <p class="helper">Weights auto-normalize when they do not sum to 100.</p>
+            </div>
+            <span class="badge blue">blend model</span>
+          </div>
+          <div class="controls-row">
+            <div class="field">
+              <label for="trendMode">Trend overlay</label>
+              <select id="trendMode">
+                <option value="1">1M trend</option>
+                <option value="3">3M trend</option>
+                <option value="6">6M trend</option>
+                <option value="avg">Average of 1M/3M/6M</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="rawWeight">Weight on raw expectation (%)</label>
+              <input id="rawWeight" data-number type="text" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="shockProbability">Shock Probability (%)</label>
+              <input id="shockProbability" data-number type="text" inputmode="decimal">
+              <p class="helper">Estimated probability of a comparable discrete policy/political shock occurring within this forecast horizon.</p>
+            </div>
+            <div class="field">
+              <label for="biasWeight">Weight on bias-adjusted forecast (%)</label>
+              <input id="biasWeight" data-number type="text" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="trendWeight">Weight on trend-adjusted forecast (%)</label>
+              <input id="trendWeight" data-number type="text" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="shockWeight">Weight on Shock-Adjusted Forecast (%)</label>
+              <input id="shockWeight" data-number type="text" inputmode="decimal">
+            </div>
+          </div>
+          <p class="note" id="weightNote" style="margin-top:10px;"></p>
+        </div>
+
+        <div class="card advanced-only" style="margin-top:12px;">
+          <div class="card-header"><h2>Calibrated Forecast Paths</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pair</th><th>Horizon</th><th>Spot Today</th><th>Raw Expected</th><th>Bias Adjustment</th><th>Bias-Adjusted Forecast</th><th>Trend-Adjusted Forecast</th><th>Shock Risk</th><th>Shock-Adjusted Forecast</th><th>Final Blended Forecast</th><th>Final Expected Dep.</th>
+                </tr>
+              </thead>
+              <tbody id="calibrationBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card advanced-only" style="margin-top:12px;">
+          <div class="card-header"><h2>Recent Realized Trend Analysis</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Pair</th><th>Lookback</th><th>Past Spot</th><th>Current Spot</th><th>Realized Dep.</th><th>Annualized Trend</th></tr></thead>
+              <tbody id="trendBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section advanced-only" data-section="scenario">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Scenario Analysis</h2>
+              <p class="helper">Manual shocks are applied in percentage points to final expected depreciation.</p>
+            </div>
+            <span class="badge yellow">what-if</span>
+          </div>
+          <div class="controls-row">
+            <div class="field">
+              <label for="scenarioType">Scenario</label>
+              <select id="scenarioType">
+                <option value="base">Base case</option>
+                <option value="tryPositive">TRY-positive case</option>
+                <option value="tryNegative">TRY-negative case</option>
+                <option value="eurusdUp">EUR/USD upside shock</option>
+                <option value="eurusdDown">EUR/USD downside shock</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="usdShock">USD/TRY shock (pp)</label>
+              <input id="usdShock" data-number type="text" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="eurShock">EUR/TRY shock (pp)</label>
+              <input id="eurShock" data-number type="text" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="eurusdShock">EUR/USD shock (pp)</label>
+              <input id="eurusdShock" data-number type="text" inputmode="decimal">
+            </div>
+          </div>
+          <div class="table-wrap" style="margin-top:12px;">
+            <table>
+              <thead><tr><th>Pair</th><th>Horizon</th><th>Base Final Forecast</th><th>Scenario Forecast</th><th>Difference</th></tr></thead>
+              <tbody id="scenarioBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" data-section="note">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Analyst Note Generator</h2>
+              <p class="helper">Produces a plain-language summary for the current calibration state.</p>
+            </div>
+            <span class="badge green">draft note</span>
+          </div>
+          <div class="actions" style="margin-bottom:12px;">
+            <button class="primary" type="button" id="generateNoteBtn">Generate Forecast Note</button>
+            <button type="button" id="copyNoteBtn">Copy Note</button>
+            <button type="button" id="downloadNoteBtn">Download as TXT</button>
+          </div>
+          <textarea id="analystNote" spellcheck="false"></textarea>
+        </div>
+      </section>
+
+      <section class="section advanced-only" data-section="methodology">
+        <div class="grid two">
+          <div class="card">
+            <div class="card-header"><h2>Methodology</h2></div>
+            <div class="formula-list">
+              <p>Expected depreciation <code>expected_rate / spot_at_T0 - 1</code></p>
+              <p>Realized depreciation <code>actual_rate / spot_at_T0 - 1</code></p>
+              <p>Forecast error <code>realized_depreciation - expected_depreciation</code></p>
+              <p>Bias-adjusted forecast <code>spot_today x (1 + raw_expected_depreciation + historical_average_error)</code></p>
+              <p>Trend-adjusted forecast <code>spot_today x (1 + realized_trend)^(horizon / 12)</code></p>
+              <p>Shock-adjusted forecast <code>spot_today x (1 + raw_expected_depreciation + shock_probability x shock_error)</code></p>
+              <p>Final blended forecast <code>weighted average of raw, bias-adjusted, trend-adjusted, and shock-adjusted forecasts</code></p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>Data Quality and Source Labels</h2></div>
+            <div class="formula-list">
+              <p>Historical expectations are manually entered. Actual rates are manually entered in v1. The model is sensitive to historical sample size, source consistency, and the type of expectation being compared.</p>
+              <p>Supported source tags: <code>Public Survey, Bank Forecast, Forward-Implied, Interpolated, Manual Analyst Input</code></p>
+              <p>Public surveys, bank research, forward-implied levels, and analyst inputs may represent different types of expectations and may not be directly comparable.</p>
+              <p>This is not a guaranteed forecast and not a trading recommendation.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const APP_BUILD = "2026-07-06-real-verified-seed-data-v5";
+    const STORAGE_KEY = "tryFxCalibrationMonitor.v1";
+    const horizons = [1, 2, 3, 5, 6, 12];
+    const pairLabels = { USDTRY: "USD/TRY", EURTRY: "EUR/TRY" };
+    const sources = ["Public Survey", "Bank Forecast", "Forward-Implied", "Interpolated", "Manual Analyst Input"];
+    const tabs = [
+      ["inputs", "Current Forecast Inputs"],
+      ["history", "Historical Forecast Errors", true],
+      ["engine", "Calibration Engine"],
+      ["scenario", "Scenario Analysis", true],
+      ["note", "Analyst Note"],
+      ["methodology", "Methodology", true]
+    ];
+
+    const demoState = {
+      viewMode: "simple",
+      activeTab: "inputs",
+      valuationDate: "2026-07-06",
+      trendMode: "avg",
+      shockProbability: 15,
+      weights: { raw: 50, bias: 30, trend: 20, shock: 0 },
+      eurusdSpot: 1.171,
+      eurusd12: 1.167,
+      crossRateEnabled: "off",
+      pairs: {
+        USDTRY: { spot: 46.79, raw: { 1: 47.50, 2: 48.10, 3: 48.90, 5: 50.40, 6: 51.10, 12: 55.72 }, trend: { today: 46.79, 1: 46.30, 3: 44.80, 6: 41.90 } },
+        EURTRY: { spot: 54.80, raw: { 1: 55.60, 2: 56.30, 3: 57.20, 5: 59.00, 6: 60.00, 12: 65.00 }, trend: { today: 54.80, 1: 53.90, 3: 51.80, 6: 48.50 } }
+      },
+      scenario: { type: "base", usdShock: 0, eurShock: 0, eurusdShock: 0 },
+      history: []
+    };
+
+    const demoCases = [
+      ["USDTRY", "2022-06-14", "Public Survey", 1, 17.278, 17.523, 17.4641, "Calm pre-2022-crisis window", false],
+      ["USDTRY", "2022-06-14", "Public Survey", 2, 17.278, 17.769, 17.9523, "Calm pre-2022-crisis window", false],
+      ["USDTRY", "2022-06-14", "Public Survey", 3, 17.278, 18.014, 18.2331, "Calm pre-2022-crisis window", false],
+      ["USDTRY", "2022-06-14", "Public Survey", 5, 17.278, 18.505, 18.5861, "Calm pre-2022-crisis window", false],
+      ["USDTRY", "2022-06-14", "Public Survey", 6, 17.278, 18.75, 18.6264, "Calm pre-2022-crisis window", false],
+      ["USDTRY", "2022-06-14", "Public Survey", 12, 17.278, 20.7, 23.5622, "Calm pre-2022-crisis window", false],
+      ["EURTRY", "2022-06-14", "Cross-Rate", 1, 18.0354, 18.292, 17.5031, "Calm pre-2022-crisis window", false],
+      ["EURTRY", "2022-06-14", "Cross-Rate", 2, 18.0354, 18.548, 18.2417, "Calm pre-2022-crisis window", false],
+      ["EURTRY", "2022-06-14", "Cross-Rate", 3, 18.0354, 18.804, 18.2119, "Calm pre-2022-crisis window", false],
+      ["EURTRY", "2022-06-14", "Cross-Rate", 5, 18.0354, 19.316, 19.1577, "Calm pre-2022-crisis window", false],
+      ["EURTRY", "2022-06-14", "Cross-Rate", 6, 18.0354, 19.572, 19.8695, "Calm pre-2022-crisis window", false],
+      ["EURTRY", "2022-06-14", "Cross-Rate", 12, 18.0354, 21.607, 25.5274, "Calm pre-2022-crisis window", false],
+      ["USDTRY", "2022-12-14", "Public Survey", 1, 18.6264, 18.934, 18.8123, "2023 policy-pivot shock lands mid-window", false],
+      ["USDTRY", "2022-12-14", "Public Survey", 2, 18.6264, 19.283, 18.8395, "2023 policy-pivot shock lands mid-window", false],
+      ["USDTRY", "2022-12-14", "Public Survey", 3, 18.6264, 19.631, 18.9756, "2023 policy-pivot shock lands mid-window", false],
+      ["USDTRY", "2022-12-14", "Public Survey", 5, 18.6264, 20.329, 19.6724, "2023 policy-pivot shock lands mid-window", false],
+      ["USDTRY", "2022-12-14", "Public Survey", 6, 18.6264, 20.678, 23.5622, "2023 policy-pivot shock lands mid-window", true],
+      ["USDTRY", "2022-12-14", "Public Survey", 12, 18.6264, 22.77, 28.968, "2023 policy-pivot shock lands mid-window", true],
+      ["EURTRY", "2022-12-14", "Cross-Rate", 1, 19.8695, 20.198, 20.3747, "2023 policy-pivot shock lands mid-window", false],
+      ["EURTRY", "2022-12-14", "Cross-Rate", 2, 19.8695, 20.57, 20.2337, "2023 policy-pivot shock lands mid-window", false],
+      ["EURTRY", "2022-12-14", "Cross-Rate", 3, 19.8695, 20.942, 20.3705, "2023 policy-pivot shock lands mid-window", false],
+      ["EURTRY", "2022-12-14", "Cross-Rate", 5, 19.8695, 21.686, 21.3917, "2023 policy-pivot shock lands mid-window", false],
+      ["EURTRY", "2022-12-14", "Cross-Rate", 6, 19.8695, 22.058, 25.5274, "2023 policy-pivot shock lands mid-window", true],
+      ["EURTRY", "2022-12-14", "Cross-Rate", 12, 19.8695, 24.29, 31.8361, "2023 policy-pivot shock lands mid-window", true],
+      ["USDTRY", "2023-12-14", "Public Survey", 1, 28.968, 30.0, 30.0856, "Post-Simsek hiking cycle window", false],
+      ["USDTRY", "2023-12-14", "Public Survey", 2, 28.968, 30.86, 30.7491, "Post-Simsek hiking cycle window", false],
+      ["USDTRY", "2023-12-14", "Public Survey", 3, 28.968, 31.72, 32.1504, "Post-Simsek hiking cycle window", false],
+      ["USDTRY", "2023-12-14", "Public Survey", 5, 28.968, 33.44, 32.2838, "Post-Simsek hiking cycle window", false],
+      ["USDTRY", "2023-12-14", "Public Survey", 6, 28.968, 34.3, 32.7842, "Post-Simsek hiking cycle window", false],
+      ["USDTRY", "2023-12-14", "Public Survey", 12, 28.968, 39.46, 34.959, "Post-Simsek hiking cycle window", false],
+      ["EURTRY", "2023-12-14", "Cross-Rate", 1, 31.8361, 32.97, 32.9475, "Post-Simsek hiking cycle window", false],
+      ["EURTRY", "2023-12-14", "Cross-Rate", 2, 31.8361, 33.915, 32.9867, "Post-Simsek hiking cycle window", false],
+      ["EURTRY", "2023-12-14", "Cross-Rate", 3, 31.8361, 34.86, 34.9953, "Post-Simsek hiking cycle window", false],
+      ["EURTRY", "2023-12-14", "Cross-Rate", 5, 31.8361, 36.751, 34.9301, "Post-Simsek hiking cycle window", false],
+      ["EURTRY", "2023-12-14", "Cross-Rate", 6, 31.8361, 37.696, 35.0968, "Post-Simsek hiking cycle window", false],
+      ["EURTRY", "2023-12-14", "Cross-Rate", 12, 31.8361, 43.367, 36.7227, "Post-Simsek hiking cycle window", false],
+      ["USDTRY", "2024-06-14", "Public Survey", 1, 32.7842, 33.539, 33.0047, "Primary reference window", false],
+      ["USDTRY", "2024-06-14", "Public Survey", 2, 32.7842, 34.295, 33.593, "Primary reference window", false],
+      ["USDTRY", "2024-06-14", "Public Survey", 3, 32.7842, 35.05, 33.927, "Primary reference window", false],
+      ["USDTRY", "2024-06-14", "Public Survey", 5, 32.7842, 36.56, 34.337, "Primary reference window", false],
+      ["USDTRY", "2024-06-14", "Public Survey", 6, 32.7842, 37.316, 34.959, "Primary reference window", false],
+      ["USDTRY", "2024-06-14", "Public Survey", 12, 32.7842, 41.411, 39.4024, "Primary reference window", false],
+      ["EURTRY", "2024-06-14", "Cross-Rate", 1, 35.0968, 35.905, 35.9695, "Primary reference window", false],
+      ["EURTRY", "2024-06-14", "Cross-Rate", 2, 35.0968, 36.714, 36.9947, "Primary reference window", false],
+      ["EURTRY", "2024-06-14", "Cross-Rate", 3, 35.0968, 37.522, 37.5763, "Primary reference window", false],
+      ["EURTRY", "2024-06-14", "Cross-Rate", 5, 35.0968, 39.139, 36.1578, "Primary reference window", false],
+      ["EURTRY", "2024-06-14", "Cross-Rate", 6, 35.0968, 39.948, 36.7227, "Primary reference window", false],
+      ["EURTRY", "2024-06-14", "Cross-Rate", 12, 35.0968, 44.333, 45.5782, "Primary reference window", false],
+      ["USDTRY", "2025-01-14", "Public Survey", 1, 35.4776, 36.133, 36.2314, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-01-14", "Public Survey", 2, 35.4776, 36.788, 36.5493, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-01-14", "Public Survey", 3, 35.4776, 37.443, 38.0304, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-01-14", "Public Survey", 5, 35.4776, 38.752, 39.4024, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-01-14", "Public Survey", 6, 35.4776, 39.407, 40.1734, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-01-14", "Public Survey", 12, 35.4776, 43.81, 43.1831, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-01-14", "Cross-Rate", 1, 36.5702, 37.245, 38.0176, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-01-14", "Cross-Rate", 2, 36.5702, 37.92, 39.7438, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-01-14", "Cross-Rate", 3, 36.5702, 38.596, 43.1636, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-01-14", "Cross-Rate", 5, 36.5702, 39.946, 45.5782, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-01-14", "Cross-Rate", 6, 36.5702, 40.621, 46.8601, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-01-14", "Cross-Rate", 12, 36.5702, 45.159, 50.3116, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-02-14", "Public Survey", 1, 36.2314, 36.865, 36.5493, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-02-14", "Public Survey", 2, 36.2314, 37.498, 38.0304, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-02-14", "Public Survey", 3, 36.2314, 38.132, 38.7683, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-02-14", "Public Survey", 5, 36.2314, 39.398, 40.1734, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-02-14", "Public Survey", 6, 36.2314, 40.032, 40.8051, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-02-14", "Public Survey", 12, 36.2314, 43.96, 43.6927, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-02-14", "Cross-Rate", 1, 38.0176, 38.682, 39.7438, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-02-14", "Cross-Rate", 2, 38.0176, 39.347, 43.1636, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-02-14", "Cross-Rate", 3, 38.0176, 40.011, 43.3624, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-02-14", "Cross-Rate", 5, 38.0176, 41.341, 46.8601, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-02-14", "Cross-Rate", 6, 38.0176, 42.005, 47.6355, "Pre-March-2025-shock window", false],
+      ["EURTRY", "2025-02-14", "Cross-Rate", 12, 38.0176, 46.127, 51.8367, "Pre-March-2025-shock window", false],
+      ["USDTRY", "2025-03-14", "Public Survey", 1, 36.5493, 37.2, 38.0304, "T0 sits days before March 2025 shock", false],
+      ["USDTRY", "2025-03-14", "Public Survey", 2, 36.5493, 37.85, 38.7683, "T0 sits days before March 2025 shock", false],
+      ["USDTRY", "2025-03-14", "Public Survey", 3, 36.5493, 38.501, 39.4024, "T0 sits days before March 2025 shock", false],
+      ["USDTRY", "2025-03-14", "Public Survey", 5, 36.5493, 39.802, 40.8051, "T0 sits days before March 2025 shock", false],
+      ["USDTRY", "2025-03-14", "Public Survey", 6, 36.5493, 40.453, 41.2948, "T0 sits days before March 2025 shock", false],
+      ["USDTRY", "2025-03-14", "Public Survey", 12, 36.5493, 44.42, 44.1969, "T0 sits days before March 2025 shock", false],
+      ["EURTRY", "2025-03-14", "Cross-Rate", 1, 39.7438, 40.451, 43.1636, "T0 sits days before March 2025 shock", false],
+      ["EURTRY", "2025-03-14", "Cross-Rate", 2, 39.7438, 41.159, 43.3624, "T0 sits days before March 2025 shock", false],
+      ["EURTRY", "2025-03-14", "Cross-Rate", 3, 39.7438, 41.866, 45.5782, "T0 sits days before March 2025 shock", false],
+      ["EURTRY", "2025-03-14", "Cross-Rate", 5, 39.7438, 43.281, 47.6355, "T0 sits days before March 2025 shock", false],
+      ["EURTRY", "2025-03-14", "Cross-Rate", 6, 39.7438, 43.988, 48.6079, "T0 sits days before March 2025 shock", false],
+      ["EURTRY", "2025-03-14", "Cross-Rate", 12, 39.7438, 48.302, 50.4749, "T0 sits days before March 2025 shock", false],
+      ["USDTRY", "2025-04-14", "Public Survey", 1, 38.0304, 38.68, 38.7683, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-04-14", "Public Survey", 2, 38.0304, 39.33, 39.4024, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-04-14", "Public Survey", 3, 38.0304, 39.979, 40.1734, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-04-14", "Public Survey", 5, 38.0304, 41.278, 41.2948, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-04-14", "Public Survey", 6, 38.0304, 41.928, 41.8172, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-04-14", "Public Survey", 12, 38.0304, 45.85, 44.7205, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-04-14", "Cross-Rate", 1, 43.1636, 43.901, 43.3624, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-04-14", "Cross-Rate", 2, 43.1636, 44.638, 45.5782, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-04-14", "Cross-Rate", 3, 43.1636, 45.375, 46.8601, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-04-14", "Cross-Rate", 5, 43.1636, 46.85, 48.6079, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-04-14", "Cross-Rate", 6, 43.1636, 47.587, 48.5783, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-04-14", "Cross-Rate", 12, 43.1636, 52.039, 52.7757, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-05-14", "Public Survey", 1, 38.7683, 39.418, 39.4024, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-05-14", "Public Survey", 2, 38.7683, 40.068, 40.1734, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-05-14", "Public Survey", 3, 38.7683, 40.718, 40.8051, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-05-14", "Public Survey", 5, 38.7683, 42.018, 41.8172, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-05-14", "Public Survey", 6, 38.7683, 42.668, 42.2566, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-05-14", "Public Survey", 12, 38.7683, 46.618, 45.4325, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-05-14", "Cross-Rate", 1, 43.3624, 44.089, 45.5782, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-05-14", "Cross-Rate", 2, 43.3624, 44.816, 46.8601, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-05-14", "Cross-Rate", 3, 43.3624, 45.543, 47.6355, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-05-14", "Cross-Rate", 5, 43.3624, 46.997, 48.5783, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-05-14", "Cross-Rate", 6, 43.3624, 47.724, 49.1348, "Post-shock stabilization window", false],
+      ["EURTRY", "2025-05-14", "Cross-Rate", 12, 43.3624, 52.143, 53.157, "Post-shock stabilization window", false],
+      ["USDTRY", "2025-06-13", "Public Survey", 1, 39.4024, 40.034, 40.1734, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["USDTRY", "2025-06-13", "Public Survey", 2, 39.4024, 40.665, 40.8051, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["USDTRY", "2025-06-13", "Public Survey", 3, 39.4024, 41.296, 41.2948, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["USDTRY", "2025-06-13", "Public Survey", 5, 39.4024, 42.558, 42.2566, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["USDTRY", "2025-06-13", "Public Survey", 6, 39.4024, 43.189, 42.6937, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["USDTRY", "2025-06-13", "Public Survey", 12, 39.4024, 47.04, 46.2891, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["EURTRY", "2025-06-13", "Cross-Rate", 1, 45.5782, 46.308, 46.8601, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["EURTRY", "2025-06-13", "Cross-Rate", 2, 45.5782, 47.038, 47.6355, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["EURTRY", "2025-06-13", "Cross-Rate", 3, 45.5782, 47.768, 48.6079, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["EURTRY", "2025-06-13", "Cross-Rate", 5, 45.5782, 49.229, 49.1348, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["EURTRY", "2025-06-13", "Cross-Rate", 6, 45.5782, 49.959, 50.2136, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false],
+      ["EURTRY", "2025-06-13", "Cross-Rate", 12, 45.5782, 54.413, 53.7, "Post-shock window; EUR 12M actual interpolated, not an exact daily close", false]
+    ].map(rowToCase);
+
+    let state = loadState();
+
+    // Converts demo array rows into normalized historical case objects.
+    function rowToCase(r) {
+      return normalizeCase({ id: cryptoId(), pair: r[0], t0_date: r[1], source: r[2], horizon_months: r[3], spot_t0: r[4], expected_rate: r[5], actual_rate: r[6], notes: r[7] || "", isShock: parseBool(r[8]) });
+    }
+
+    // Parses CSV and form values into a strict boolean shock flag.
+    function parseBool(value) {
+      if (value === true || value === 1) return true;
+      const s = String(value ?? "").trim().toLowerCase();
+      return ["true", "1", "yes", "y", "shock"].includes(s);
+    }
+
+    // Preserves the known Dec 2022 policy-pivot shock classification across imports.
+    function isDec2022ShockCase(row) {
+      const date = String(row.t0_date || "").trim();
+      const isDec14 = date.startsWith("2022-12-14") || date.startsWith("14.12.2022") || date.startsWith("14/12/2022") || date.startsWith("12/14/2022");
+      return isDec14 && [6, 12].includes(Number(row.horizon_months));
+    }
+
+    // Applies defaults and migration rules to a single historical case.
+    function normalizeCase(row) {
+      const source = /survey/i.test(String(row.source || "")) && row.source !== "Public Survey" ? "Public Survey" : row.source;
+      return { ...row, source, id: row.id || cryptoId(), isShock: parseBool(row.isShock) || isDec2022ShockCase(row) };
+    }
+
+    // Normalizes all historical cases after loading, importing, or resetting.
+    function normalizeHistory(rows) {
+      return (Array.isArray(rows) ? rows : []).map(normalizeCase);
+    }
+
+    // Generates local row identifiers for editable historical cases.
+    function cryptoId() {
+      return "id_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    // Deep-clones simple state objects used by the demo/reset workflow.
+    function clone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    // Loads persisted user state, falling back to seeded demo data.
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && saved.pairs && Array.isArray(saved.history)) return mergeState(clone(demoState), saved);
+      } catch (e) {}
+      const fresh = clone(demoState);
+      fresh.history = clone(demoCases);
+      return fresh;
+    }
+
+    // Merges saved state onto the current schema while preserving new defaults.
+    function mergeState(base, saved) {
+      return {
+        ...base,
+        ...saved,
+        shockProbability: saved.shockProbability ?? base.shockProbability,
+        weights: { ...base.weights, ...(saved.weights || {}) },
+        scenario: { ...base.scenario, ...(saved.scenario || {}) },
+        pairs: {
+          USDTRY: { ...base.pairs.USDTRY, ...(saved.pairs?.USDTRY || {}), raw: { ...base.pairs.USDTRY.raw, ...(saved.pairs?.USDTRY?.raw || {}) }, trend: { ...base.pairs.USDTRY.trend, ...(saved.pairs?.USDTRY?.trend || {}) } },
+          EURTRY: { ...base.pairs.EURTRY, ...(saved.pairs?.EURTRY || {}), raw: { ...base.pairs.EURTRY.raw, ...(saved.pairs?.EURTRY?.raw || {}) }, trend: { ...base.pairs.EURTRY.trend, ...(saved.pairs?.EURTRY?.trend || {}) } }
+        },
+        history: Array.isArray(saved.history) ? normalizeHistory(saved.history) : normalizeHistory(base.history)
+      };
+    }
+
+    // Persists the current manual inputs and historical rows locally.
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // Converts decimal text inputs to numbers without accepting invalid strings.
+    function num(value) {
+      if (value === "" || value === null || value === undefined) return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    // Formats rate outputs for tables and cards.
+    function fmt(value, digits = 2) {
+      const n = num(value);
+      return n === null ? "-" : n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    }
+
+    // Formats decimal returns as percentages.
+    function pct(value, digits = 1) {
+      const n = num(value);
+      return n === null ? "-" : (n * 100).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits }) + "%";
+    }
+
+    // Formats decimal forecast errors as percentage points.
+    function pp(value, digits = 1) {
+      const n = num(value);
+      return n === null ? "-" : (n * 100).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits }) + " pp";
+    }
+
+    // Calculates a median for historical error summaries.
+    function median(values) {
+      const clean = values.filter(v => Number.isFinite(v)).sort((a, b) => a - b);
+      if (!clean.length) return null;
+      const mid = Math.floor(clean.length / 2);
+      return clean.length % 2 ? clean[mid] : (clean[mid - 1] + clean[mid]) / 2;
+    }
+
+    // Calculates an average while ignoring invalid values.
+    function average(values) {
+      const clean = values.filter(v => Number.isFinite(v));
+      return clean.length ? clean.reduce((a, b) => a + b, 0) / clean.length : null;
+    }
+
+    // Calculates expected depreciation, realized depreciation, and forecast error.
+    function calcCase(row) {
+      const spot = num(row.spot_t0), expected = num(row.expected_rate), actual = num(row.actual_rate);
+      if (!spot || !expected || !actual) return null;
+      const expectedDep = expected / spot - 1;
+      const realizedDep = actual / spot - 1;
+      const forecastErrorPp = realizedDep - expectedDep;
+      const absoluteError = actual - expected;
+      return { ...row, expectedDep, realizedDep, forecastErrorPp, absoluteError };
+    }
+
+    // Classifies historical forecast errors into dashboard verdict badges.
+    function verdict(error) {
+      if (!Number.isFinite(error)) return { text: "-", tone: "" };
+      if (error > .02) return { text: "Underestimated depreciation", tone: Math.abs(error) > .05 ? "red" : "yellow" };
+      if (error < -.02) return { text: "Overestimated depreciation", tone: Math.abs(error) > .05 ? "red" : "yellow" };
+      return { text: "Broadly in line", tone: "green" };
+    }
+
+    // Returns valid historical cases with derived error metrics attached.
+    function calculatedCases() {
+      return state.history.map(calcCase).filter(Boolean);
+    }
+
+    // Aggregates normal, non-shock historical bias by pair and horizon.
+    function biasStats() {
+      const stats = {};
+      for (const pair of ["USDTRY", "EURTRY"]) {
+        stats[pair] = {};
+        for (const h of horizons) {
+          const rows = calculatedCases().filter(r => !r.isShock && r.pair === pair && Number(r.horizon_months) === h);
+          const errors = rows.map(r => r.forecastErrorPp);
+          const abs = rows.map(r => r.absoluteError);
+          const avgError = average(errors);
+          stats[pair][h] = {
+            count: rows.length,
+            avgError,
+            medianError: median(errors),
+            avgAbsoluteError: average(abs),
+            sources: [...new Set(rows.map(r => r.source).filter(Boolean))]
+          };
+        }
+      }
+      return stats;
+    }
+
+    // Aggregates shock-only historical forecast error by pair and horizon.
+    function shockStats() {
+      const stats = {};
+      for (const pair of ["USDTRY", "EURTRY"]) {
+        stats[pair] = {};
+        for (const h of horizons) {
+          const rows = calculatedCases().filter(r => r.isShock && r.pair === pair && Number(r.horizon_months) === h);
+          const errors = rows.map(r => r.forecastErrorPp);
+          stats[pair][h] = {
+            count: rows.length,
+            avgError: average(errors),
+            medianError: median(errors),
+            sources: [...new Set(rows.map(r => r.source).filter(Boolean))]
+          };
+        }
+      }
+      return stats;
+    }
+
+    // Finds exact or nearest-horizon bias, sharing USD/TRY bias into EUR/TRY.
+    function nearestBias(pair, horizon) {
+      // EUR/TRY expectation rows are cross-rate derived and their standalone
+      // bias was found to be dominated by EUR/USD path drift contamination.
+      // Reuse USD/TRY's TRY-depreciation bias for EUR/TRY calibration instead.
+      const biasPair = pair === "EURTRY" ? "USDTRY" : pair;
+      const stats = biasStats()[biasPair];
+      if (!stats) return { value: 0, sourceHorizon: null, count: 0 };
+      if (stats[horizon]?.count) return { value: stats[horizon].avgError || 0, sourceHorizon: horizon, count: stats[horizon].count };
+      let best = null;
+      for (const h of horizons) {
+        if (stats[h].count) {
+          const candidate = { h, dist: Math.abs(h - horizon), count: stats[h].count, value: stats[h].avgError || 0 };
+          if (!best || candidate.dist < best.dist) best = candidate;
+        }
+      }
+      return best ? { value: best.value, sourceHorizon: best.h, count: best.count } : { value: 0, sourceHorizon: null, count: 0 };
+    }
+
+    // Finds exact or nearest-horizon shock risk, sharing USD/TRY shock into EUR/TRY.
+    function nearestShock(pair, horizon) {
+      const shockPair = pair === "EURTRY" ? "USDTRY" : pair;
+      const stats = shockStats()[shockPair];
+      if (!stats) return { value: 0, sourceHorizon: null, count: 0 };
+      if (stats[horizon]?.count) return { value: stats[horizon].avgError || 0, sourceHorizon: horizon, count: stats[horizon].count };
+      let best = null;
+      for (const h of horizons) {
+        if (stats[h].count) {
+          const candidate = { h, dist: Math.abs(h - horizon), count: stats[h].count, value: stats[h].avgError || 0 };
+          if (!best || candidate.dist < best.dist) best = candidate;
+        }
+      }
+      return best ? { value: best.value, sourceHorizon: best.h, count: best.count } : { value: 0, sourceHorizon: null, count: 0 };
+    }
+
+    // Calculates recent realized depreciation and annualized trend inputs.
+    function trendRows() {
+      const rows = [];
+      for (const pair of ["USDTRY", "EURTRY"]) {
+        const t = state.pairs[pair].trend;
+        const today = num(t.today);
+        for (const m of [1, 3, 6]) {
+          const past = num(t[m]);
+          if (!today || !past) {
+            rows.push({ pair, months: m, past, today, realizedDep: null, annualized: null });
+          } else {
+            const realizedDep = today / past - 1;
+            rows.push({ pair, months: m, past, today, realizedDep, annualized: Math.pow(1 + realizedDep, 12 / m) - 1 });
+          }
+        }
+      }
+      return rows;
+    }
+
+    // Selects the requested trend mode, sharing USD/TRY trend into EUR/TRY.
+    function selectedTrend(pair) {
+      // EUR/TRY trailing spot moves include EUR/USD drift, so its raw trend
+      // inputs remain visible for audit but are not used for calibration.
+      const trendPair = pair === "EURTRY" ? "USDTRY" : pair;
+      const rows = trendRows().filter(r => r.pair === trendPair && Number.isFinite(r.annualized));
+      if (state.trendMode === "avg") return average(rows.map(r => r.annualized)) || 0;
+      const match = rows.find(r => r.months === Number(state.trendMode));
+      return match?.annualized || 0;
+    }
+
+    // Normalizes raw, bias, trend, and shock weights into blend shares.
+    function normalizedWeights() {
+      const raw = Math.max(0, num(state.weights.raw) ?? 0);
+      const bias = Math.max(0, num(state.weights.bias) ?? 0);
+      const trend = Math.max(0, num(state.weights.trend) ?? 0);
+      const shock = Math.max(0, num(state.weights.shock) ?? 0);
+      const total = raw + bias + trend + shock;
+      if (!total) return { raw: 1, bias: 0, trend: 0, shock: 0, total };
+      return { raw: raw / total, bias: bias / total, trend: trend / total, shock: shock / total, total };
+    }
+
+    // Builds the full raw, adjusted, and blended forecast path table.
+    function calibrationRows() {
+      const weights = normalizedWeights();
+      const shockProb = Math.max(0, Math.min(1, (num(state.shockProbability) ?? 0) / 100));
+      const out = [];
+      for (const pair of ["USDTRY", "EURTRY"]) {
+        const spot = num(state.pairs[pair].spot);
+        for (const h of horizons) {
+          const rawRate = num(state.pairs[pair].raw[h]);
+          if (!spot || !rawRate) {
+            out.push({ pair, horizon: h, spot, rawRate, bias: null, shock: null, biasAdjustedRate: null, trendAdjustedRate: null, shockAdjustedRate: null, finalForecast: null, finalDep: null });
+            continue;
+          }
+          const rawDep = rawRate / spot - 1;
+          const bias = nearestBias(pair, h);
+          const biasAdjustedDep = rawDep + bias.value;
+          const biasAdjustedRate = spot * (1 + biasAdjustedDep);
+          const trend = selectedTrend(pair);
+          const trendAdjustedRate = spot * Math.pow(1 + trend, h / 12);
+          const shock = nearestShock(pair, h);
+          const shockAdjustedDep = rawDep + shockProb * shock.value;
+          const shockAdjustedRate = spot * (1 + shockAdjustedDep);
+          const finalForecast = rawRate * weights.raw + biasAdjustedRate * weights.bias + trendAdjustedRate * weights.trend + shockAdjustedRate * weights.shock;
+          out.push({ pair, horizon: h, spot, rawRate, rawDep, bias: bias.value, biasSourceHorizon: bias.sourceHorizon, biasCount: bias.count, shock: shock.value, shockSourceHorizon: shock.sourceHorizon, shockCount: shock.count, shockProb, biasAdjustedRate, trendAdjustedRate, shockAdjustedRate, finalForecast, finalDep: finalForecast / spot - 1 });
+        }
+      }
+      return out;
+    }
+
+    // Supplies default scenario shocks for the scenario selector.
+    function scenarioDefaults(type) {
+      const defaults = {
+        base: [0, 0, 0],
+        tryPositive: [-3, -3, 0],
+        tryNegative: [5, 5, 0],
+        eurusdUp: [0, 0, 4],
+        eurusdDown: [0, 0, -4]
+      };
+      return defaults[type] || defaults.base;
+    }
+
+    // Applies selected scenario shocks to calibrated forecasts.
+    function scenarioRows() {
+      const usdShock = (num(state.scenario.usdShock) || 0) / 100;
+      const eurShock = (num(state.scenario.eurShock) || 0) / 100;
+      const eurusdShock = (num(state.scenario.eurusdShock) || 0) / 100;
+      const crossOn = state.crossRateEnabled === "on";
+      return calibrationRows().map(r => {
+        if (!r.spot || !r.finalForecast) return { ...r, scenarioForecast: null, difference: null };
+        let shock = r.pair === "USDTRY" ? usdShock : eurShock;
+        if (r.pair === "EURTRY" && crossOn) shock += eurusdShock;
+        const scenarioForecast = r.spot * (1 + r.finalDep + shock);
+        return { ...r, scenarioForecast, difference: scenarioForecast - r.finalForecast };
+      });
+    }
+
+    // Compares floating-point values for regression sanity checks.
+    function approxEqual(a, b, tolerance = 1e-10) {
+      return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= tolerance;
+    }
+
+    // Flags linkage or blend regressions directly in the UI and console.
+    function regressionSanityCheck() {
+      const warnings = [];
+      for (const h of horizons) {
+        const usd = nearestBias("USDTRY", h);
+        const eur = nearestBias("EURTRY", h);
+        const sameValue = approxEqual(usd.value, eur.value);
+        const sameHorizon = usd.sourceHorizon === eur.sourceHorizon;
+        const sameCount = usd.count === eur.count;
+        if (!sameValue || !sameHorizon || !sameCount) {
+          warnings.push(`EUR/TRY bias mismatch at ${h}M: USD=${pp(usd.value)} / EUR=${pp(eur.value)}.`);
+        }
+      }
+
+      const usdTrend = selectedTrend("USDTRY");
+      const eurTrend = selectedTrend("EURTRY");
+      if (!approxEqual(usdTrend, eurTrend)) {
+        warnings.push(`EUR/TRY trend mismatch: USD=${pct(usdTrend)} / EUR=${pct(eurTrend)}.`);
+      }
+
+      for (const h of horizons) {
+        const usd = nearestShock("USDTRY", h);
+        const eur = nearestShock("EURTRY", h);
+        const sameValue = approxEqual(usd.value, eur.value);
+        const sameHorizon = usd.sourceHorizon === eur.sourceHorizon;
+        const sameCount = usd.count === eur.count;
+        if (!sameValue || !sameHorizon || !sameCount) {
+          warnings.push(`EUR/TRY shock mismatch at ${h}M: USD=${pp(usd.value)} / EUR=${pp(eur.value)}.`);
+        }
+      }
+
+      const stats = biasStats();
+      for (const pair of ["USDTRY", "EURTRY"]) {
+        for (const h of horizons) {
+          const normalCount = calculatedCases().filter(r => !r.isShock && r.pair === pair && Number(r.horizon_months) === h).length;
+          if (stats[pair][h].count !== normalCount) {
+            warnings.push(`Shock exclusion failed for ${pair} ${h}M normal bias count.`);
+          }
+        }
+      }
+
+      const weights = normalizedWeights();
+      const nonRawWeight = weights.bias + weights.trend + weights.shock;
+      const eurRows = calibrationRows().filter(r => r.pair === "EURTRY");
+      for (const r of eurRows) {
+        const componentsDiffer = !approxEqual(r.rawRate, r.biasAdjustedRate, 1e-8) || !approxEqual(r.rawRate, r.trendAdjustedRate, 1e-8) || !approxEqual(r.rawRate, r.shockAdjustedRate, 1e-8);
+        const finalEqualsRaw = approxEqual(r.finalForecast, r.rawRate, 1e-8);
+        if (nonRawWeight > 1e-10 && componentsDiffer && finalEqualsRaw) {
+          warnings.push(`EUR/TRY ${r.horizon}M final equals raw despite non-raw blend weights.`);
+        }
+      }
+
+      return warnings;
+    }
+
+    // Renders the visible build and regression status marker.
+    function renderDebugNote() {
+      document.getElementById("buildMarker").textContent = `Build ${APP_BUILD}`;
+      const warnings = regressionSanityCheck();
+      const el = document.getElementById("debugNote");
+      el.classList.toggle("warn", warnings.length > 0);
+      el.textContent = warnings.length
+        ? `Sanity check warning: ${warnings.join(" ")}`
+        : `Sanity check OK: EUR/TRY calibration bias, trend, AND shock risk are linked to USD/TRY across all horizons; shock-flagged historical cases are excluded from normal bias/trend averages.`;
+      if (warnings.length) console.warn(`[${APP_BUILD}]`, warnings.join(" "));
+      else console.log(`[${APP_BUILD}] sanity check OK`);
+    }
+
+    // Converts average bias into a plain-English direction.
+    function biasDirection(avg) {
+      if (!Number.isFinite(avg)) return "-";
+      if (avg > .01) return "Historically underestimated TRY depreciation";
+      if (avg < -.01) return "Historically overestimated TRY depreciation";
+      return "Historically broadly balanced";
+    }
+
+    // Renders tab buttons and wires tab navigation.
+    function renderTabs() {
+      const el = document.getElementById("tabs");
+      el.innerHTML = tabs.map(([id, label, advanced]) => `<button type="button" class="tab ${state.activeTab === id ? "active" : ""} ${advanced ? "advanced-only" : ""}" data-tab="${id}">${label}</button>`).join("");
+      el.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => {
+        state.activeTab = btn.dataset.tab;
+        render();
+      }));
+    }
+
+    // Synchronizes persistent state into static form controls.
+    function renderStaticInputs() {
+      document.getElementById("valuationDate").value = state.valuationDate || "";
+      document.getElementById("eurusdSpot").value = state.eurusdSpot ?? "";
+      document.getElementById("eurusd12").value = state.eurusd12 ?? "";
+      document.getElementById("crossRateEnabled").value = state.crossRateEnabled || "off";
+      document.getElementById("trendMode").value = state.trendMode || "avg";
+      document.getElementById("shockProbability").value = state.shockProbability ?? "";
+      document.getElementById("rawWeight").value = state.weights.raw ?? "";
+      document.getElementById("biasWeight").value = state.weights.bias ?? "";
+      document.getElementById("trendWeight").value = state.weights.trend ?? "";
+      document.getElementById("shockWeight").value = state.weights.shock ?? "";
+      document.getElementById("scenarioType").value = state.scenario.type || "base";
+      document.getElementById("usdShock").value = state.scenario.usdShock ?? "";
+      document.getElementById("eurShock").value = state.scenario.eurShock ?? "";
+      document.getElementById("eurusdShock").value = state.scenario.eurusdShock ?? "";
+    }
+
+    // Renders pair-specific spot and raw expectation inputs.
+    function renderPairInputs(pair, targetId) {
+      const p = state.pairs[pair];
+      const rows = [`<div class="field"><label>${pairLabels[pair]} spot today</label><input data-pair="${pair}" data-key="spot" data-number type="text" inputmode="decimal" value="${p.spot ?? ""}"></div>`];
+      for (const h of horizons) {
+        rows.push(`<div class="field"><label>Raw expected ${pairLabels[pair]} ${h}M</label><input data-pair="${pair}" data-raw="${h}" data-number type="text" inputmode="decimal" value="${p.raw[h] ?? ""}"></div>`);
+      }
+      document.getElementById(targetId).innerHTML = rows.join("");
+    }
+
+    // Renders pair-specific recent realized trend input fields.
+    function renderTrendInputs(pair, targetId) {
+      const t = state.pairs[pair].trend;
+      const labels = [["today", "Spot today"], [1, "Spot 1M ago"], [3, "Spot 3M ago"], [6, "Spot 6M ago"]];
+      document.getElementById(targetId).innerHTML = labels.map(([key, label]) => `<div class="field"><label>${pairLabels[pair]} ${label}</label><input data-pair="${pair}" data-trend="${key}" data-number type="text" inputmode="decimal" value="${t[key] ?? ""}"></div>`).join("");
+    }
+
+    // Renders the main 12M forecast cards and compact snapshot.
+    function renderHeroCards() {
+      const rows = calibrationRows();
+      document.getElementById("heroCards").innerHTML = ["USDTRY", "EURTRY"].map(pair => {
+        const r = rows.find(x => x.pair === pair && x.horizon === 12) || {};
+        const avgBias = nearestBias(pair, 12);
+        const interp = pair === "EURTRY"
+          ? `EUR/TRY bias-adjustment reuses the USD/TRY historical bias (${pp(avgBias.value)}), since EUR/TRY-specific bias was found to be largely explained by EUR/USD path drift rather than independent lira mis-forecasting.`
+          : `Historical cases suggest ${pairLabels[pair]} forecasts have ${biasDirection(avgBias.value).replace("Historically ", "")} by an average of ${pp(avgBias.value)} for the selected horizon. The final blended 12M forecast is ${fmt(r.finalForecast)} versus the raw expectation of ${fmt(r.rawRate)}.`;
+        return `<div class="card hero-card ${pair === "USDTRY" ? "usd" : "eur"}">
+          <div class="hero-top"><h3>${pairLabels[pair]} 12M</h3><span class="badge ${pair === "USDTRY" ? "blue" : "green"}">12M calibration</span></div>
+          <div class="metric"><span class="metric-label">Final blended 12M</span><span class="metric-value">${fmt(r.finalForecast)}</span><span class="metric-small">Final expected depreciation: ${pct(r.finalDep)}</span></div>
+          <div class="kpi-row">
+            <div class="kpi"><span class="metric-label">Spot today</span><div class="metric-value">${fmt(r.spot)}</div></div>
+            <div class="kpi"><span class="metric-label">Raw 12M</span><div class="metric-value">${fmt(r.rawRate)}</div></div>
+            <div class="kpi"><span class="metric-label">Bias-adj.</span><div class="metric-value">${fmt(r.biasAdjustedRate)}</div></div>
+            <div class="kpi"><span class="metric-label">Trend-adj.</span><div class="metric-value">${fmt(r.trendAdjustedRate)}</div></div>
+            <div class="kpi"><span class="metric-label">Shock-adj.</span><div class="metric-value">${fmt(r.shockAdjustedRate)}</div></div>
+            <div class="kpi"><span class="metric-label">Shock Risk</span><div class="metric-value">${pp(r.shock)}</div><div class="metric-small">${pct(r.shockProb)} probability</div></div>
+          </div>
+          <p class="metric-small">${interp}</p>
+        </div>`;
+      }).join("");
+      document.getElementById("miniSnapshot").innerHTML = ["USDTRY", "EURTRY"].map(pair => {
+        const r = rows.find(x => x.pair === pair && x.horizon === 12) || {};
+        return `<div class="kpi"><span class="metric-label">${pairLabels[pair]} final 12M</span><div class="metric-value">${fmt(r.finalForecast)}</div><div class="metric-small">${pct(r.finalDep)} dep.</div></div>`;
+      }).join("");
+    }
+
+    // Renders editable historical rows and derived forecast-error table.
+    function renderHistory() {
+      document.getElementById("historyCount").textContent = `${state.history.length} rows`;
+      document.getElementById("historyBody").innerHTML = state.history.map(row => `
+        <tr data-id="${row.id}">
+          <td><select data-hist="pair">${["USDTRY", "EURTRY"].map(p => `<option value="${p}" ${row.pair === p ? "selected" : ""}>${p}</option>`).join("")}</select></td>
+          <td><input data-hist="t0_date" type="date" value="${escapeHtml(row.t0_date || "")}"></td>
+          <td><select data-hist="source">${sources.map(s => `<option value="${s}" ${row.source === s ? "selected" : ""}>${s}</option>`).join("")}</select></td>
+          <td><select data-hist="horizon_months">${horizons.map(h => `<option value="${h}" ${Number(row.horizon_months) === h ? "selected" : ""}>${h}</option>`).join("")}</select></td>
+          <td><input data-hist="spot_t0" data-number type="text" inputmode="decimal" value="${row.spot_t0 ?? ""}"></td>
+          <td><input data-hist="expected_rate" data-number type="text" inputmode="decimal" value="${row.expected_rate ?? ""}"></td>
+          <td><input data-hist="actual_rate" data-number type="text" inputmode="decimal" value="${row.actual_rate ?? ""}"></td>
+          <td><input class="notes-input" data-hist="notes" value="${escapeHtml(row.notes || "")}"></td>
+          <td><input data-hist="isShock" type="checkbox" ${row.isShock ? "checked" : ""}></td>
+          <td><button class="delete-btn danger" type="button" data-delete="${row.id}">Delete</button></td>
+        </tr>`).join("");
+
+      const calcRows = calculatedCases();
+      document.getElementById("errorBody").innerHTML = calcRows.length ? calcRows.map(r => {
+        const v = verdict(r.forecastErrorPp);
+        return `<tr><td><strong>${r.pair}</strong></td><td>${escapeHtml(r.t0_date || "-")}${r.isShock ? ` <span class="badge red">shock</span>` : ""}</td><td>${r.horizon_months}M</td><td>${escapeHtml(r.source || "-")}</td><td>${fmt(r.spot_t0)}</td><td>${fmt(r.expected_rate)}</td><td>${fmt(r.actual_rate)}</td><td>${pct(r.expectedDep)}</td><td>${pct(r.realizedDep)}</td><td>${pp(r.forecastErrorPp)}</td><td><span class="badge ${v.tone}">${v.text}</span></td></tr>`;
+      }).join("") : `<tr><td colspan="11">No valid historical rows yet.</td></tr>`;
+      renderBiasSummary();
+      renderDataQuality();
+    }
+
+    // Renders historical bias cards and the horizon summary table.
+    function renderBiasSummary() {
+      const stats = biasStats();
+      document.getElementById("biasCards").innerHTML = ["USDTRY", "EURTRY"].map(pair => {
+        const errors = horizons.flatMap(h => {
+          const s = stats[pair][h];
+          return s.count ? [{ h, ...s }] : [];
+        });
+        const total = errors.reduce((sum, s) => sum + s.count, 0);
+        const weightedAvg = total ? errors.reduce((sum, s) => sum + (s.avgError || 0) * s.count, 0) / total : null;
+        return `<div class="card">
+          <div class="card-header"><h3>${pairLabels[pair]} Bias Summary</h3><span class="badge ${weightedAvg > .01 ? "yellow" : weightedAvg < -.01 ? "yellow" : "green"}">${total} obs</span></div>
+          <div class="metric"><span class="metric-label">Aggregate average forecast error</span><span class="metric-value">${pp(weightedAvg)}</span><span class="metric-small">${biasDirection(weightedAvg)}</span></div>
+        </div>`;
+      }).join("");
+      const rows = [];
+      for (const pair of ["USDTRY", "EURTRY"]) {
+        for (const h of horizons) {
+          const s = stats[pair][h];
+          rows.push(`<tr><td><strong>${pair}</strong></td><td>${h}M</td><td>${s.count}</td><td>${pp(s.avgError)}</td><td>${pp(s.medianError)}</td><td>${biasDirection(s.avgError)}</td></tr>`);
+        }
+      }
+      document.getElementById("biasTableBody").innerHTML = rows.join("");
+    }
+
+    // Renders warnings for small samples and mixed historical source types.
+    function renderDataQuality() {
+      const stats = biasStats();
+      const warnings = [];
+      for (const pair of ["USDTRY", "EURTRY"]) {
+        for (const h of horizons) {
+          const s = stats[pair][h];
+          if (s.count > 0 && s.count < 3) warnings.push(`Low sample size: calibration may be unstable for ${pairLabels[pair]} ${h}M (${s.count} observation${s.count === 1 ? "" : "s"}).`);
+          if (s.sources.length > 1) warnings.push(`Mixed source types: survey, forward-implied and bank forecasts may not be directly comparable for ${pairLabels[pair]} ${h}M.`);
+        }
+      }
+      document.getElementById("dataQualityWarnings").innerHTML = warnings.slice(0, 10).map(w => `<div class="warning">${escapeHtml(w)}</div>`).join("");
+    }
+
+    // Renders the calibrated forecast path table and normalized weight note.
+    function renderCalibration() {
+      const weights = normalizedWeights();
+      document.getElementById("weightNote").textContent = `Normalized blend: raw ${(weights.raw * 100).toFixed(1)}%, bias-adjusted ${(weights.bias * 100).toFixed(1)}%, trend-adjusted ${(weights.trend * 100).toFixed(1)}%, shock-adjusted ${(weights.shock * 100).toFixed(1)}%. Input total: ${weights.total.toFixed(1)}%.`;
+      document.getElementById("calibrationBody").innerHTML = calibrationRows().map(r => `<tr>
+        <td><strong>${r.pair}</strong></td><td>${r.horizon}M</td><td>${fmt(r.spot)}</td><td>${fmt(r.rawRate)}</td><td>${pp(r.bias)}${r.biasSourceHorizon && r.biasSourceHorizon !== r.horizon ? ` <span class="badge yellow">nearest ${r.biasSourceHorizon}M</span>` : ""}</td><td>${fmt(r.biasAdjustedRate)}</td><td>${fmt(r.trendAdjustedRate)}</td><td>${pp(r.shock)}${r.shockSourceHorizon && r.shockSourceHorizon !== r.horizon ? ` <span class="badge yellow">nearest ${r.shockSourceHorizon}M</span>` : ""}</td><td>${fmt(r.shockAdjustedRate)}</td><td><strong>${fmt(r.finalForecast)}</strong></td><td>${pct(r.finalDep)}</td>
+      </tr>`).join("");
+      document.getElementById("trendBody").innerHTML = trendRows().map(r => `<tr><td><strong>${r.pair}</strong></td><td>${r.months}M</td><td>${fmt(r.past)}</td><td>${fmt(r.today)}</td><td>${pct(r.realizedDep)}</td><td>${pct(r.annualized)}</td></tr>`).join("");
+    }
+
+    // Renders scenario-adjusted forecast outputs.
+    function renderScenario() {
+      document.getElementById("scenarioBody").innerHTML = scenarioRows().map(r => `<tr><td><strong>${r.pair}</strong></td><td>${r.horizon}M</td><td>${fmt(r.finalForecast)}</td><td>${fmt(r.scenarioForecast)}</td><td>${fmt(r.difference)}</td></tr>`).join("");
+    }
+
+    // Generates the analyst note from the current calibration state.
+    function generateNote() {
+      const rows = calibrationRows();
+      const usd = rows.find(r => r.pair === "USDTRY" && r.horizon === 12) || {};
+      const eur = rows.find(r => r.pair === "EURTRY" && r.horizon === 12) || {};
+      const usdBias = nearestBias("USDTRY", 12).value;
+      const eurBias = nearestBias("EURTRY", 12).value;
+      const usdTrend = selectedTrend("USDTRY");
+      const eurTrend = selectedTrend("EURTRY");
+      return [
+        `TRY FX Forecast Calibration Monitor - Analyst Note`,
+        `Valuation date: ${state.valuationDate || "-"}`,
+        ``,
+        `USD/TRY spot is ${fmt(usd.spot)}. The raw 12M expectation is ${fmt(usd.rawRate)}, implying ${pct(usd.rawDep)} depreciation. Historical T0 cases suggest forecasts have ${biasDirection(usdBias).replace("Historically ", "")} by ${pp(usdBias)} on average for comparable horizons. The selected recent realized trend overlay is ${pct(usdTrend)} annualized. After applying the historical bias and realized-trend overlay, the final blended 12M forecast is ${fmt(usd.finalForecast)}, implying ${pct(usd.finalDep)} depreciation from spot.`,
+        ``,
+        `EUR/TRY spot is ${fmt(eur.spot)}. The raw 12M expectation is ${fmt(eur.rawRate)}, implying ${pct(eur.rawDep)} depreciation. EUR/TRY bias-adjustment reuses the USD/TRY historical bias of ${pp(eurBias)}, since EUR/TRY-specific bias can be contaminated by EUR/USD path drift. The selected recent realized trend overlay is ${pct(eurTrend)} annualized. After applying the shared TRY-bias and realized-trend overlay, the final blended 12M forecast is ${fmt(eur.finalForecast)}, implying ${pct(eur.finalDep)} depreciation from spot.`,
+        ``,
+        `Interpretation: this realization-based framework compares current FX expectations with user-supplied historical forecast errors and recent realized TRY depreciation trends. The output is a calibration and error-tracking view, not a guaranteed prediction.`,
+        ``,
+        `Disclaimer: Independent research prototype. Not affiliated with any bank or financial institution. Not a trading recommendation. No live data is used in this v1.`
+      ].join("\n");
+    }
+
+    // Populates the note textarea without overwriting user edits unless forced.
+    function renderNote(force) {
+      const area = document.getElementById("analystNote");
+      if (force || !area.value) area.value = generateNote();
+    }
+
+    // Escapes user-entered text before injecting it into table markup.
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[ch]));
+    }
+
+    // Captures focused input state so rerenders do not interrupt typing.
+    function captureFocus() {
+      const el = document.activeElement;
+      if (!el || !["INPUT", "SELECT", "TEXTAREA"].includes(el.tagName)) return null;
+      const row = el.closest("tr");
+      return {
+        id: el.id || "",
+        hist: el.dataset.hist || "",
+        pair: el.dataset.pair || "",
+        raw: el.dataset.raw || "",
+        trend: el.dataset.trend || "",
+        key: el.dataset.key || "",
+        rowId: row?.dataset.id || "",
+        start: typeof el.selectionStart === "number" ? el.selectionStart : null,
+        end: typeof el.selectionEnd === "number" ? el.selectionEnd : null
+      };
+    }
+
+    // Restores focused input state after dynamic rerenders.
+    function restoreFocus(focus) {
+      if (!focus) return;
+      let selector = "";
+      if (focus.id) selector = `#${CSS.escape(focus.id)}`;
+      else if (focus.hist && focus.rowId) selector = `tr[data-id="${CSS.escape(focus.rowId)}"] [data-hist="${CSS.escape(focus.hist)}"]`;
+      else if (focus.pair && focus.raw) selector = `[data-pair="${CSS.escape(focus.pair)}"][data-raw="${CSS.escape(focus.raw)}"]`;
+      else if (focus.pair && focus.trend) selector = `[data-pair="${CSS.escape(focus.pair)}"][data-trend="${CSS.escape(focus.trend)}"]`;
+      else if (focus.pair && focus.key) selector = `[data-pair="${CSS.escape(focus.pair)}"][data-key="${CSS.escape(focus.key)}"]`;
+      const el = selector ? document.querySelector(selector) : null;
+      if (!el) return;
+      el.focus({ preventScroll: true });
+      if (focus.start !== null && typeof el.setSelectionRange === "function") {
+        try { el.setSelectionRange(focus.start, focus.end); } catch (e) {}
+      }
+    }
+
+    // Runs the full UI render pipeline and persists the updated state.
+    function render() {
+      const focus = captureFocus();
+      if (state.viewMode === "simple" && !["inputs", "engine", "note"].includes(state.activeTab)) state.activeTab = "inputs";
+      document.body.classList.toggle("simple", state.viewMode === "simple");
+      document.getElementById("simpleBtn").classList.toggle("active", state.viewMode === "simple");
+      document.getElementById("advancedBtn").classList.toggle("active", state.viewMode === "advanced");
+      document.querySelectorAll(".section").forEach(sec => sec.classList.toggle("active", sec.dataset.section === state.activeTab));
+      renderTabs();
+      renderStaticInputs();
+      renderPairInputs("USDTRY", "usdInputs");
+      renderPairInputs("EURTRY", "eurInputs");
+      renderTrendInputs("USDTRY", "usdTrendInputs");
+      renderTrendInputs("EURTRY", "eurTrendInputs");
+      renderHeroCards();
+      renderHistory();
+      renderCalibration();
+      renderScenario();
+      renderNote(false);
+      renderDebugNote();
+      saveState();
+      attachDynamicEvents();
+      validateNumbers();
+      restoreFocus(focus);
+    }
+
+    // Reattaches handlers to controls regenerated during render.
+    function attachDynamicEvents() {
+      document.querySelectorAll("[data-pair][data-key]").forEach(input => input.oninput = e => {
+        state.pairs[e.target.dataset.pair][e.target.dataset.key] = e.target.value;
+        render();
+      });
+      document.querySelectorAll("[data-pair][data-raw]").forEach(input => input.oninput = e => {
+        state.pairs[e.target.dataset.pair].raw[e.target.dataset.raw] = e.target.value;
+        render();
+      });
+      document.querySelectorAll("[data-pair][data-trend]").forEach(input => input.oninput = e => {
+        state.pairs[e.target.dataset.pair].trend[e.target.dataset.trend] = e.target.value;
+        render();
+      });
+      document.querySelectorAll("[data-hist]").forEach(input => input.oninput = e => {
+        const row = state.history.find(r => r.id === e.target.closest("tr").dataset.id);
+        if (row) row[e.target.dataset.hist] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+        render();
+      });
+      document.querySelectorAll("[data-delete]").forEach(btn => btn.onclick = e => {
+        state.history = state.history.filter(r => r.id !== e.target.dataset.delete);
+        render();
+      });
+    }
+
+    // Marks invalid decimal inputs without throwing runtime errors.
+    function validateNumbers() {
+      document.querySelectorAll("[data-number]").forEach(input => {
+        const bad = input.value !== "" && !Number.isFinite(Number(input.value));
+        input.classList.toggle("invalid", bad);
+      });
+    }
+
+    // Exports historical rows, including shock flags, as CSV.
+    function exportCsv() {
+      const header = "pair,t0_date,source,horizon_months,spot_t0,expected_rate,actual_rate,notes,is_shock";
+      const lines = state.history.map(r => [r.pair, r.t0_date, r.source, r.horizon_months, r.spot_t0, r.expected_rate, r.actual_rate, r.notes, r.isShock ? "true" : "false"].map(csvCell).join(","));
+      download("try_fx_historical_cases.csv", [header, ...lines].join("\n"), "text/csv");
+    }
+
+    // Escapes one value for RFC-style CSV output.
+    function csvCell(value) {
+      const s = value === undefined || value === null ? "" : String(value);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }
+
+    // Parses imported CSV while respecting quoted cells.
+    function parseCsv(text) {
+      const rows = [];
+      let row = [], cell = "", quote = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i], next = text[i + 1];
+        if (quote && ch === '"' && next === '"') { cell += '"'; i++; }
+        else if (ch === '"') quote = !quote;
+        else if (!quote && ch === ",") { row.push(cell); cell = ""; }
+        else if (!quote && (ch === "\n" || ch === "\r")) {
+          if (ch === "\r" && next === "\n") i++;
+          row.push(cell); cell = "";
+          if (row.some(x => x.trim() !== "")) rows.push(row);
+          row = [];
+        } else cell += ch;
+      }
+      row.push(cell);
+      if (row.some(x => x.trim() !== "")) rows.push(row);
+      return rows;
+    }
+
+    // Imports historical cases from current or legacy CSV schemas.
+    function importCsvText(text) {
+      const rows = parseCsv(text);
+      if (!rows.length) return;
+      const header = rows[0].map(h => h.trim());
+      const idx = name => header.indexOf(name);
+      const imported = rows.slice(1).map(cols => ({
+        id: cryptoId(),
+        pair: cols[idx("pair")] || "USDTRY",
+        t0_date: cols[idx("t0_date")] || "",
+        source: cols[idx("source")] || "Manual Analyst Input",
+        horizon_months: Number(cols[idx("horizon_months")]) || 12,
+        spot_t0: cols[idx("spot_t0")] || "",
+        expected_rate: cols[idx("expected_rate")] || "",
+        actual_rate: cols[idx("actual_rate")] || "",
+        notes: cols[idx("notes")] || "",
+        isShock: idx("is_shock") >= 0 ? parseBool(cols[idx("is_shock")]) : false
+      })).filter(r => ["USDTRY", "EURTRY"].includes(r.pair)).map(normalizeCase);
+      state.history = [...state.history, ...imported];
+      render();
+    }
+
+    // Triggers browser downloads for CSV and TXT artifacts.
+    function download(filename, text, type = "text/plain") {
+      const blob = new Blob([text], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener("input", e => {
+      if (e.target.id === "valuationDate") state.valuationDate = e.target.value;
+      if (e.target.id === "eurusdSpot") state.eurusdSpot = e.target.value;
+      if (e.target.id === "eurusd12") state.eurusd12 = e.target.value;
+      if (e.target.id === "shockProbability") state.shockProbability = e.target.value;
+      if (e.target.id === "rawWeight") state.weights.raw = e.target.value;
+      if (e.target.id === "biasWeight") state.weights.bias = e.target.value;
+      if (e.target.id === "trendWeight") state.weights.trend = e.target.value;
+      if (e.target.id === "shockWeight") state.weights.shock = e.target.value;
+      if (e.target.id === "usdShock") state.scenario.usdShock = e.target.value;
+      if (e.target.id === "eurShock") state.scenario.eurShock = e.target.value;
+      if (e.target.id === "eurusdShock") state.scenario.eurusdShock = e.target.value;
+      if (["valuationDate", "eurusdSpot", "eurusd12", "shockProbability", "rawWeight", "biasWeight", "trendWeight", "shockWeight", "usdShock", "eurShock", "eurusdShock"].includes(e.target.id)) render();
+    });
+
+    document.addEventListener("change", e => {
+      if (e.target.id === "crossRateEnabled") state.crossRateEnabled = e.target.value;
+      if (e.target.id === "trendMode") state.trendMode = e.target.value;
+      if (e.target.id === "scenarioType") {
+        state.scenario.type = e.target.value;
+        const [usd, eur, eu] = scenarioDefaults(e.target.value);
+        state.scenario.usdShock = usd;
+        state.scenario.eurShock = eur;
+        state.scenario.eurusdShock = eu;
+      }
+      if (["crossRateEnabled", "trendMode", "scenarioType"].includes(e.target.id)) render();
+    });
+
+    document.getElementById("simpleBtn").addEventListener("click", () => { state.viewMode = "simple"; render(); });
+    document.getElementById("advancedBtn").addEventListener("click", () => { state.viewMode = "advanced"; render(); });
+    document.getElementById("resetDemoBtn").addEventListener("click", () => { state = clone(demoState); state.history = clone(demoCases); render(); });
+    document.getElementById("clearStorageBtn").addEventListener("click", () => { localStorage.removeItem(STORAGE_KEY); state = clone(demoState); render(); });
+    document.getElementById("addCaseBtn").addEventListener("click", () => {
+      state.history.push({ id: cryptoId(), pair: "USDTRY", t0_date: state.valuationDate || "", source: "Manual Analyst Input", horizon_months: 12, spot_t0: "", expected_rate: "", actual_rate: "", notes: "", isShock: false });
+      render();
+    });
+    document.getElementById("loadDemoCasesBtn").addEventListener("click", () => { state.history = clone(demoCases); render(); });
+    document.getElementById("clearCasesBtn").addEventListener("click", () => { state.history = []; render(); });
+    document.getElementById("exportCsvBtn").addEventListener("click", exportCsv);
+    document.getElementById("importCsvBtn").addEventListener("click", () => document.getElementById("csvFile").click());
+    document.getElementById("csvFile").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => importCsvText(reader.result);
+      reader.readAsText(file);
+      e.target.value = "";
+    });
+    document.getElementById("generateNoteBtn").addEventListener("click", () => renderNote(true));
+    document.getElementById("copyNoteBtn").addEventListener("click", async () => {
+      const note = document.getElementById("analystNote").value;
+      try { await navigator.clipboard.writeText(note); } catch (e) {}
+    });
+    document.getElementById("downloadNoteBtn").addEventListener("click", () => download("try_fx_forecast_note.txt", document.getElementById("analystNote").value));
+
+    render();
+  </script>
+</body>
+</html>
